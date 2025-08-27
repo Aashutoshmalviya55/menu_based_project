@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Send Email to Any Recipient</title>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    // Initialize EmailJS with your public key
+    (function() {
+      emailjs.init("1GFa_C5Z3AYqQT2-M"); // 🔁 Replace this
+    })();
+  </script>
+</head>
+<body>
+
+  <h2>Send Email to Any Recipient</h2>
+  <form id="email-form">
+    <label>Sender Name:</label><br>
+    <input type="text" name="from_name" required><br><br>
+
+    <label>Sender Email:</label><br>
+    <input type="email" name="reply_to" required><br><br>
+
+    <label>Receiver Email:</label><br>
+    <input type="email" name="to_email" required><br><br>
+
+    <label>Message:</label><br>
+    <textarea name="message" rows="5" required></textarea><br><br>
+
+    <button type="submit">Send Email</button>
+  </form>
+
+  <script>
+    document.getElementById("email-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      emailjs.sendForm("service_4wspy19", "template_6ndlpod", this) // 🔁 Replace these
+        .then(function(response) {
+          alert("✅ Email sent successfully!");
+          console.log("recievers reponse",response)
+        },
+        //  function(error) {
+        //   console.error("❌ Email sending failed:", error);
+        //   alert("Failed to send email. Check console for error.");
+        // }
+        );
+    });
+  </script>
+</body>
+</html>

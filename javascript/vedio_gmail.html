@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Video Capture & Email</title>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      background: #f8f9fa;
+    }
+
+    h2, h3 {
+      color: #333;
+    }
+
+    video, canvas {
+      width: 100%;
+      max-width: 320px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      padding: 6px 10px;
+      font-size: 14px;
+      background: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      flex: 1 1 calc(50% - 6px);
+    }
+
+    .btn:hover {
+      background-color: #574fe1;
+    }
+
+    input, textarea, button[type="submit"] {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button[type="submit"] {
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🎥 Live Webcam</h2>
+<video id="video" autoplay muted></video>
+<canvas id="canvas" style="display:none;"></canvas>
+<video id="recordedVideo" controls style="display:none;"></video>
+
+<div id="controls">
+  <button class="btn" onclick="startCamera()">▶️ Start Camera</button>
+  <button class="btn" onclick="stopCamera()">⛔ Stop Camera</button>
+  <button class="btn" onclick="startRecording()">🎬 Start Recording</button>
+  <button class="btn" onclick="stopRecording()">💾 Stop & Save</button>
+</div>
+
+<h3>📧 Send Snapshot + Video Link</h3>
+<form id="emailForm" onsubmit="sendSnapshot(event)">
+  <input type="text" id="from_name" placeholder="Sender Name" required>
+  <input type="email" id="to_email" placeholder="Recipient Email" required>
+  <textarea id="message" rows="4" placeholder="Your message..." required></textarea>
+  <button type="submit">📸 Capture & Send Email</button>
+</form>
+
+<script>
+  let video = document.getElementById('video');
+  let canvas = document.getElementById('canvas');
+  let recordedVideo = document.getElementById('recordedVideo');
+  let stream = null;
+  let mediaRecorder;
+  let recordedChunks = [];
+  let videoBlobUrl = "";
+
+  emailjs.init("1GFa_C5Z3AYqQT2-M"); // Replace with your EmailJS Public Key
+
+  function startCamera() {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(s => {
+        stream = s;
+        video.srcObject = stream;
+      })
+      .catch(err => alert("Camera access denied: " + err));
+  }
+
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      video.srcObject = null;
+    }
+  }
+
+  function startRecording() {
+    if (!stream) return alert("Start the camera first!");
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => e.data.size > 0 && recordedChunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
+      videoBlobUrl = URL.createObjectURL(blob);
+      recordedVideo.src = videoBlobUrl;
+      recordedVideo.style.display = "block";
+    };
+    mediaRecorder.start();
+    alert("🎥 Recording started...");
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+      alert("💾 Recording saved.");
+    }
+  }
+
+  function sendSnapshot(event) {
+    event.preventDefault();
+
+    const fromName = document.getElementById('from_name').value;
+    const toEmail = document.getElementById('to_email').value;
+    const messageText = document.getElementById('message').value;
+
+    // Snapshot from video
+    const ctx = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageBase64 = canvas.toDataURL('image/png');
+
+    const finalMessage = messageText + `\n\n🎬 Video Link (local):\n${videoBlobUrl}`;
+
+    emailjs.send("service_4wspy19", "template_sh7626d", {
+      from_name: fromName,
+      to_email: toEmail,
+      message: finalMessage,
+      image_base64: imageBase64
+    }).then(
+      () => alert("✅ Email sent successfully!"),
+      error => alert("❌ Error sending email: " + error.text)
+    );
+  }
+</script>
+
+</body>
+</html>

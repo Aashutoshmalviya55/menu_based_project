@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Send Email with Attachment</title>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function () {
+      emailjs.init("1GFa_C5Z3AYqQT2-M"); // Replace with your actual EmailJS public key
+    })();
+  </script>
+</head>
+<body>
+
+<h2>Send Email with Photo Attachment</h2>
+
+<form id="email-form">
+  <label>Sender Name:</label><br>
+  <input type="text" name="from_name" required><br><br>
+
+  <label>Sender Email:</label><br>
+  <input type="email" name="reply_to" required><br><br>
+
+  <label>Receiver Email:</label><br>
+  <input type="email" name="to_email" required><br><br>
+
+  <label>Message:</label><br>
+  <textarea name="message" rows="5" required></textarea><br><br>
+
+  <label>Upload Image:</label><br>
+  <input type="file" id="imageUpload" accept="image/*" required><br><br>
+
+  <button type="submit">Send Email</button>
+</form>
+
+<script>
+  const form = document.getElementById("email-form");
+  const fileInput = document.getElementById("imageUpload");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      const base64Data = reader.result;
+
+      const templateParams = {
+        from_name: form.from_name.value,
+        reply_to: form.reply_to.value,
+        to_email: form.to_email.value,
+        message: form.message.value,
+        attachments: [
+          {
+            name: file.name,
+            data: base64Data
+          }
+        ]
+      };
+
+      emailjs.send("service_4wspy19", "template_6ndlpod", templateParams)
+        .then(function (response) {
+          alert("✅ Email sent with attachment!");
+          console.log("Success:", response);
+        }, function (error) {
+          console.error("❌ Email failed:", error);
+          alert("Failed to send email.");
+        });
+    };
+
+    reader.readAsDataURL(file);
+  });
+</script>
+
+</body>
+</html>
+

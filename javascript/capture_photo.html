@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Webcam Capture and Save</title>
+  <style>
+    video, canvas, img {
+      width: 300px;
+      height: 225px;
+      border: 2px solid #444;
+      margin-bottom: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>📸 Take a Photo</h2>
+
+  <!-- Live Webcam -->
+  <video id="video" autoplay playsinline></video><br>
+
+  <!-- Buttons -->
+  <button id="capture">📷 Capture</button>
+  <button id="stop">🛑 Stop Camera</button>
+  <button id="save" disabled>💾 Save Photo</button><br>
+
+  <!-- Hidden Canvas -->
+  <canvas id="canvas" style="display: none;"></canvas>
+
+  <!-- Show Captured Image -->
+  <img id="photo" alt="Captured Image"><br>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photo = document.getElementById('photo');
+    const captureBtn = document.getElementById('capture');
+    const stopBtn = document.getElementById('stop');
+    const saveBtn = document.getElementById('save');
+    let stream;
+
+    //Start camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(s => {
+        stream = s;
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert('Camera error: ' + err);
+      });
+
+    //Capture photo
+    captureBtn.addEventListener('click', () => {
+      if (!video.videoWidth || !video.videoHeight) {
+        alert("Camera not ready yet. Please wait.");
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const dataURL = canvas.toDataURL('image/png');
+      photo.src = dataURL;
+      saveBtn.disabled = false;
+    });
+
+    //Stop camera
+    stopBtn.addEventListener('click', () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+      }
+    });
+
+    //Save photo
+    saveBtn.addEventListener('click', () => {
+      const dataURL = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = 'captured_photo.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html> 

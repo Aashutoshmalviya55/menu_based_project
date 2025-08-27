@@ -1,0 +1,25 @@
+<h3>Send WhatsApp Message</h3>
+
+  <input type="text" id="number" placeholder="Enter phone number with country code">
+  <br><br>
+
+  <textarea id="message" placeholder="Type your message here"></textarea>
+  <br><br>
+
+  <button onclick="whatsapp()">Send Message</button>
+
+  <script>
+    function whatsapp() {
+      var number = document.getElementById("number").value.trim();
+      var message = document.getElementById("message").value.trim();
+
+      if (number === "" || message === "") {
+        alert("Please enter both phone number and message.");
+        return;
+      }
+
+
+      var url = "https://wa.me/" + number + "?text=" + encodeURIComponent(message);
+      window.open(url, '_blank');
+    }
+  </script>
