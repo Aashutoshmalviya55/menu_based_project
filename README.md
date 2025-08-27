@@ -115,6 +115,6 @@ Includes my **personal portfolio**:
 
 📞 Phone: +91-6267907637
 
-🔗 LinkedIn-
+🔗 LinkedIn- linkedin.com/in/aashutosh-malviya-8740b9280
 
-🛄 Portfolio- 
+🛄 Portfolio- https://aashutohsmalviya.netlify.app/
