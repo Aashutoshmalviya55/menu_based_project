@@ -105,8 +105,6 @@ Includes my **personal portfolio**:
 
 ---
 
-(Add screenshots here once available)
-
 📬 Contact
 
 👨‍💻 Aashutosh Malviya
